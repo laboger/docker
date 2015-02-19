@@ -93,6 +93,12 @@ if [ -z "$DOCKER_CLIENTONLY" ]; then
 	DOCKER_BUILDTAGS+=" daemon"
 fi
 
+#Enable gccgo based build for Power arch
+case `uname -m` in
+        ppc64*) 
+                USE_GCCGO=1;;
+esac
+
 # Use these flags when compiling the tests and final binary
 LDFLAGS='
 	-X '$DOCKER_PKG'/dockerversion.GITCOMMIT "'$GITCOMMIT'"

@@ -16,15 +16,6 @@ if [ -z "$DOCKER_CLIENTONLY" ]; then
 		    " \
     		./dockerinit
     else
-        cat > dockerversion/dockerversion_gccgo.go <<EOF
-package dockerversion
-
-func init() {
-        GITCOMMIT = "$GITCOMMIT"
-        VERSION  = "$VERSION"
-        IAMSTATIC = "true"
-}
-EOF
         go build -compiler gccgo \
             -o "$DEST/dockerinit-$VERSION" \
             "${BUILDFLAGS[@]}" \
@@ -47,7 +38,7 @@ EOF
 	elif command -v shasum &> /dev/null; then
 		# Mac OS X - why couldn't they just use the same command name and be happy?
 		sha1sum=shasum
-	else
+   	else
 		echo >&2 'error: cannot find sha1sum command or equivalent'
 		exit 1
 	fi
@@ -62,11 +53,11 @@ fi
 
 (
 
-    if [ -z "$USE_GCCGO" ]; then 
-    	export LDFLAGS_STATIC_DOCKER="-X $DOCKER_PKG/dockerversion.INITSHA1 \"$DOCKER_INITSHA1\" -X $DOCKER_PKG/dockerversion.INITPATH \"$DOCKER_INITPATH\""
+    if [ -z "$USE_GCCGO" ]; then
+        export LDFLAGS_STATIC_DOCKER="-X $DOCKER_PKG/dockerversion.INITSHA1 \"$DOCKER_INITSHA1\" -X $DOCKER_PKG/dockerversion.INITPATH \"$DOCKER_INITPATH\""
     else
         export EXTLDFLAGS_STATIC_DOCKER=""
-    cat > dockerversion/dockerversion_gccgo.go <<EOF
+    cat > dockerversion/dockerversion_dyn.go <<EOF
 package dockerversion
 
 func init() {
@@ -79,5 +70,6 @@ func init() {
 EOF
   fi
     export BUILDFLAGS=( "${BUILDFLAGS[@]/netgo /}" ) # disable netgo, since we don't need it for a dynamic binary
+    export IAMSTATIC=false
     source "$(dirname "$BASH_SOURCE")/binary"
 )

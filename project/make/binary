@@ -6,6 +6,8 @@ BINARY_NAME="docker-$VERSION"
 BINARY_EXTENSION="$(binary_extension)"
 BINARY_FULLNAME="$BINARY_NAME$BINARY_EXTENSION"
 
+: ${IAMSTATIC:=true}
+
 if [ -z "$USE_GCCGO" ]; then
     # Cygdrive paths don't play well with go build -o.
     if [[ "$(uname -s)" == CYGWIN* ]]; then
@@ -21,13 +23,13 @@ if [ -z "$USE_GCCGO" ]; then
         " \
         ./docker
 else
-    cat > dockerversion/dockerversion_gccgo.go <<EOF
+    cat > dockerversion/dockerversion_bin.go <<EOF
 package dockerversion
 
 func init() {
 	GITCOMMIT = "$GITCOMMIT"
 	VERSION  = "$VERSION"
-	IAMSTATIC = "true"
+	IAMSTATIC = "$IAMSTATIC"
 }
 EOF
 
@@ -42,6 +44,9 @@ EOF
                         -lpcre
                 " \
                 ./docker
+
+rm -f dockerversion/dockerversion_bin.go
+rm -f dockerversion/dockerversion_dyn.go
 
 fi
 
