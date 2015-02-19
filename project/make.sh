@@ -98,6 +98,12 @@ if [ "$DOCKER_EXECDRIVER" = 'lxc' ]; then
 	DOCKER_BUILDTAGS+=' test_no_exec'
 fi
 
+#Enable gccgo based build for Power arch
+case `uname -m` in
+        ppc64*) 
+                USE_GCCGO=1;;
+esac
+
 # Use these flags when compiling the tests and final binary
 LDFLAGS='
 	-X '$DOCKER_PKG'/dockerversion.GITCOMMIT "'$GITCOMMIT'"
