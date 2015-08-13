@@ -45,7 +45,7 @@ clone git github.com/tent/canonical-json-go 96e4ba3a7613a1216cbd1badca4efe382ade
 clone git github.com/agl/ed25519 d2b94fd789ea21d12fac1a4443dd3a3f79cda72c
 
 #clone git github.com/opencontainers/runc v0.0.2 # libcontainer
-clone git github.com/opencontainers/runc 43eafac952ff164d1d7d82d2a7ae70e37821107a https://github.com/clnperez/runc
+clone git github.com/opencontainers/runc c9294f7278a23658a7703ab902c54ab6d37737cd https://github.com/clnperez/runc
 # libcontainer deps (see src/github.com/docker/libcontainer/update-vendor.sh)
 clone git github.com/coreos/go-systemd v3
 clone git github.com/godbus/dbus v2
