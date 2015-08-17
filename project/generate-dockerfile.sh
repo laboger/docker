@@ -34,13 +34,13 @@ EOF
 
 if [ "$ARCH" == "s390x" ] ; then
 	cat <<-'EOF'
-		FROM ibmcom/gccgo_z:latest
+		FROM ibmcom/gccgo_z:glibcfix
 		ENV CGO_ENABLED 1
 		ENV USE_GCCGO  1
 	EOF
 elif [ "$ARCH" == "ppc64le" ] ; then
 	cat <<-'EOF'
-		FROM ibmcom/gccgo_p:latest
+		FROM ibmcom/gccgo-ppc64le:latest
 		ENV CGO_ENABLED 1
 		ENV USE_GCCGO  1
 	EOF
@@ -78,7 +78,6 @@ RUN apt-get update && apt-get install -y \
        bash-completion \
        btrfs-tools \
        build-essential \
-       createrepo \
        curl \
        dpkg-sig \
        git \
@@ -186,12 +185,6 @@ RUN git clone https://github.com/golang/tools.git /go/src/golang.org/x/tools \
        && go install -v golang.org/x/tools/cmd/cover \
        && go install -v golang.org/x/tools/cmd/vet
 
-# Grab Go's lint tool
-ENV GO_LINT_COMMIT f42f5c1c440621302702cb0741e9d2ca547ae80f
-RUN git clone https://github.com/golang/lint.git /go/src/github.com/golang/lint \
-       && (cd /go/src/github.com/golang/lint && git checkout -q $GO_LINT_COMMIT) \
-       && go install -v github.com/golang/lint/golint
-
 # TODO replace FPM with some very minimal debhelper stuff
 EOF
 
@@ -205,17 +198,25 @@ cat <<-'EOF'
 RUN gem install --no-rdoc --no-ri fpm --version 1.3.2
 
 EOF
-cat <<-'EOF'
-# Install registry
-ENV REGISTRY_COMMIT 2317f721a3d8428215a2b65da4ae85212ed473b4
-RUN set -x \
-       && export GOPATH="$(mktemp -d)" \
-       && git clone https://github.com/docker/distribution.git "$GOPATH/src/github.com/docker/distribution" \
-       && (cd "$GOPATH/src/github.com/docker/distribution" && git checkout -q "$REGISTRY_COMMIT") \
-       && GOPATH="$GOPATH/src/github.com/docker/distribution/Godeps/_workspace:$GOPATH" \
-               go build -o /usr/local/bin/registry-v2 github.com/docker/distribution/cmd/registry \
-       && rm -rf "$GOPATH"
 
+if [ "$ARCH" == "x86_64" ]; then
+	cat <<-'EOF'
+	RUN echo 'Ignore Registry until crypto fix is added.'
+	EOF
+else    
+	cat <<-'EOF'
+	# Install registry
+	ENV REGISTRY_COMMIT 2317f721a3d8428215a2b65da4ae85212ed473b4
+	RUN set -x \
+	       && export GOPATH="$(mktemp -d)" \
+	       && git clone https://github.com/docker/distribution.git "$GOPATH/src/github.com/docker/distribution" \
+	       && (cd "$GOPATH/src/github.com/docker/distribution" && git checkout -q "$REGISTRY_COMMIT") \
+	       && GOPATH="$GOPATH/src/github.com/docker/distribution/Godeps/_workspace:$GOPATH" \
+	               go build -o /usr/local/bin/registry-v2 github.com/docker/distribution/cmd/registry \
+	       && rm -rf "$GOPATH"
+	EOF
+fi
+cat <<-'EOF'
 # Install notary server
 ENV NOTARY_COMMIT 77bced079e83d80f40c1f0a544b1a8a3b97fb052
 RUN set -x \
@@ -227,7 +228,7 @@ RUN set -x \
        && rm -rf "$GOPATH"
 
 # Get the "docker-py" source so we can run their integration tests
-ENV DOCKER_PY_COMMIT 8a87001d09852058f08a807ab6e8491d57ca1e88
+ENV DOCKER_PY_COMMIT 91985b239764fe54714fa0a93d52aa362357d251
 RUN git clone https://github.com/docker/docker-py.git /docker-py \
        && cd /docker-py \
        && git checkout -q $DOCKER_PY_COMMIT
@@ -261,9 +262,9 @@ if [ "$ARCH" == "ppc64le" ]; then
 		# Get useful and necessary Hub images so we can "docker load" locally instead of pulling
 		COPY contrib/download-frozen-image.sh /go/src/github.com/docker/docker/contrib/
 		RUN ./contrib/download-frozen-image.sh /docker-frozen-images \
-		         ibmcom/busybox_p:latest \
-		         ibmcom/hello-world_p:frozen \
-		         ibmcom/unshare_p:latest
+		         ibmcom/busybox-ppc64le:latest \
+		         ibmcom/hello-world-ppc64le:frozen \
+		         ibmcom/unshare-ppc64le:latest
 		# see also "hack/make/.ensure-frozen-images" (which needs to be updated any time this list is)
 	EOF
 elif [ "$ARCH" == "s390x" ]; then
@@ -271,9 +272,9 @@ elif [ "$ARCH" == "s390x" ]; then
 		# Get useful and necessary Hub images so we can "docker load" locally instead of pulling
 		COPY contrib/download-frozen-image.sh /go/src/github.com/docker/docker/contrib/
 		RUN ./contrib/download-frozen-image.sh /docker-frozen-images \
-		         ibmcom/busybox_z:latest \
-		         ibmcom/hello-world_z:frozen \
-		         ibmcom/unshare_z:latest
+		         ibmcom/busybox-s390x:latest \
+		         ibmcom/hello-world-s390x:frozen \
+		         ibmcom/unshare-s390x:latest
 		# see also "hack/make/.ensure-frozen-images" (which needs to be updated any time this list is)
 	EOF
 else
