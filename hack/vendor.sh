@@ -22,7 +22,7 @@ clone hg code.google.com/p/gosqlite 74691fb6f837
 
 #get libnetwork packages
 #clone git github.com/docker/libnetwork bd3eecc96f3c05a4acef1bedcf74397bc6850d22
-clone git github.com/docker/libnetwork 1fde7267a1328d6bec6ac515195be78f2237b7d0 https://github.com/clnperez/libnetwork
+clone git github.com/docker/libnetwork 0d830e6fb2854d580937f9fd2766ee06aa4ac14d https://github.com/clnperez/libnetwork
 clone git github.com/armon/go-metrics eb0af217e5e9747e41dd5303755356b62d28e3ec
 clone git github.com/hashicorp/go-msgpack 71c2886f5a673a35f909803f38ece5810165097b
 clone git github.com/hashicorp/memberlist 9a1e242e454d2443df330bdd51a436d5a9058fc4
